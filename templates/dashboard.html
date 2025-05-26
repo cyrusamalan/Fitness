@@ -7,24 +7,67 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f7f7f7;
     }
-    .settings-btn {
-      position: absolute;
+
+    .dashboard-container {
+      text-align: center;
+      background-color: #ffffff;
+      padding: 40px 60px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      position: relative;
+      width: 80%;
+      max-width: 600px;
+    }
+
+    .settings-btn,
+    .logout-btn {
+      position: fixed;
       top: 20px;
-      right: 30px;
-      background-color: #007bff;
-      color: white;
       padding: 10px 15px;
+      color: white;
       text-decoration: none;
       border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .settings-btn {
+      right: 30px;
+      background-color: #007bff;
+    }
+
+    .logout-btn {
+      left: 30px;
+      background-color: #dc3545;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-top: 0;
     }
   </style>
 </head>
 <body>
-  <!-- Settings Button -->
-  <a href="/settings" class="settings-btn">⚙️ Settings</a>
 
-  <h1>Welcome, {{ username }}!</h1>
-  <p>This is your personalized dashboard.</p>
+  <!-- Fixed Buttons in Page Corners -->
+  <a href="/settings" class="settings-btn">⚙️ Settings</a>
+  <a href="/logout" class="logout-btn">🚪 Logout</a>
+
+  <!-- Centered Content -->
+  <div class="dashboard-container">
+    <h1>Welcome, {{ username }}!</h1>
+    <p>This is your personalized dashboard.</p>
+  </div>
+
 </body>
 </html>

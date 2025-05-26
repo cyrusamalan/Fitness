@@ -180,6 +180,13 @@ def update_account():
 
     return redirect('/settings')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("👋 You have been logged out.")
+    return redirect('/')
+
+
 
 
 
