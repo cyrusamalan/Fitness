@@ -53,5 +53,6 @@ create table profile(
 	weight int,
 	age int,
 	gender CHAR(1) CHECK (gender IN ('M', 'F')),
+	goal_weight int,
 	foreign key(user_id) references users(user_id)
 );

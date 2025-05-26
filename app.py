@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, flash, session, url
 import psycopg2
 import bcrypt
 from datetime import datetime
+from functools import wraps
+from flask import make_response
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # used for flashing messages
@@ -14,6 +16,17 @@ def get_db_connection():
         host="localhost",
         port="5432"
     )
+
+def nocache(view):
+    @wraps(view)
+    def no_cache(*args, **kwargs):
+        response = make_response(view(*args, **kwargs))
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "-1"
+        return response
+    return no_cache
+
 
 @app.route('/')
 def index():
@@ -88,6 +101,7 @@ def login():
     return redirect('/')
 
 @app.route('/dashboard')
+@nocache
 def dashboard():
     username = session.get('username')
     if not username:
@@ -96,6 +110,7 @@ def dashboard():
     return render_template('dashboard.html', username=username)
 
 @app.route('/settings')
+@nocache
 def settings():
     username = session.get('username')
     if not username:
@@ -195,6 +210,7 @@ def logout():
     return redirect('/')
 
 @app.route('/profile', methods=['GET', 'POST'])
+@nocache
 def profile():
     username = session.get('username')
     if not username:
@@ -204,7 +220,7 @@ def profile():
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Get user_id from username
+    # Get user_id
     cur.execute("""
         SELECT u.user_id FROM users u
         JOIN authentication a ON u.user_id = a.user_id
@@ -224,18 +240,21 @@ def profile():
         weight = request.form['weight']
         age = request.form['age']
         gender = request.form['gender'].upper()
+        goal_weight = request.form['goal_weight']
+
 
         try:
             cur.execute("""
-                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender, goal_weight)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id)
                 DO UPDATE SET height_ft = EXCLUDED.height_ft,
-                              height_in = EXCLUDED.height_in,
-                              weight = EXCLUDED.weight,
-                              age = EXCLUDED.age,
-                              gender = EXCLUDED.gender;
-            """, (user_id, height_ft, height_in, weight, age, gender))
+                            height_in = EXCLUDED.height_in,
+                            weight = EXCLUDED.weight,
+                            age = EXCLUDED.age,
+                            gender = EXCLUDED.gender,
+                            goal_weight = EXCLUDED.goal_weight;
+            """, (user_id, height_ft, height_in, weight, age, gender, goal_weight))
             conn.commit()
             flash("✅ Profile saved successfully!")
         except Exception as e:
@@ -245,13 +264,110 @@ def profile():
             cur.close()
             conn.close()
 
-        return redirect('/dashboard')
+        return redirect('/profile')
 
-    # GET request – just show the form
+    # Handle GET: check if profile exists
+    cur.execute("SELECT height_ft, height_in, weight, age, gender, goal_weight FROM profile WHERE user_id = %s", (user_id,))
+    profile_row = cur.fetchone()
     cur.close()
     conn.close()
-    return render_template('profile_form.html', username=username)
 
+    if profile_row:
+        height_ft, height_in, weight, age, gender, goal_weight= profile_row
+        return render_template(
+            'profile_view.html',
+            username=username,
+            height_ft=height_ft,
+            height_in=height_in,
+            weight=weight,
+            age=age,
+            gender=gender,
+            goal_weight=goal_weight
+        )
+    else:
+        return render_template('profile_form.html', username=username)
+
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@nocache
+def edit_profile():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get user_id
+    cur.execute("""
+        SELECT u.user_id FROM users u
+        JOIN authentication a ON u.user_id = a.user_id
+        WHERE a.username = %s
+    """, (username,))
+    user_row = cur.fetchone()
+
+    if not user_row:
+        flash("❌ User not found.")
+        return redirect('/dashboard')
+
+    user_id = user_row[0]
+
+    if request.method == 'POST':
+        height_ft = request.form['height_ft']
+        height_in = request.form['height_in']
+        weight = request.form['weight']
+        age = request.form['age']
+        gender = request.form['gender'].upper()
+        goal_weight = request.form['goal_weight']
+
+        try:
+            cur.execute("""
+                UPDATE profile
+                SET height_ft = %s,
+                    height_in = %s,
+                    weight = %s,
+                    age = %s,
+                    gender = %s,
+                    goal_weight = %s
+                WHERE user_id = %s
+            """, (height_ft, height_in, weight, age, gender, goal_weight, user_id))
+            conn.commit()
+            flash("✅ Profile updated successfully!")
+        except Exception as e:
+            conn.rollback()
+            flash(f"❌ Error updating profile: {str(e)}")
+        finally:
+            cur.close()
+            conn.close()
+
+        return redirect('/profile')
+
+    # GET request: Pre-fill the form
+    cur.execute("""
+        SELECT height_ft, height_in, weight, age, gender, goal_weight
+        FROM profile
+        WHERE user_id = %s
+    """, (user_id,))
+    profile = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if profile:
+        return render_template(
+            'profile_edit_form.html',
+            username=username,
+            height_ft=profile[0],
+            height_in=profile[1],
+            weight=profile[2],
+            age=profile[3],
+            gender=profile[4],
+            goal_weight=profile[5]
+        )
+    else:
+        flash("❌ No profile data to edit.")
+        return redirect('/profile')
+    
 
 
 if __name__ == '__main__':

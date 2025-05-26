@@ -1,0 +1,64 @@
+<!-- templates/profile_view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Your Profile</title>
+  <style>
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+<style>
+  .container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+  }
+
+  .edit-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    padding: 6px 12px;
+    background-color: #ffc107;
+    color: black;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .edit-btn:hover {
+    background-color: #e0a800;
+  }
+</style>
+
+
+</head>
+<body>
+  <div class="container">
+    <h2>Profile for {{ username }}</h2>
+    <p><strong>Height:</strong> {{ height_ft }} ft {{ height_in }} in</p>
+    <p><strong>Weight:</strong> {{ weight }} lbs</p>
+    <p><strong>Age:</strong> {{ age }}</p>
+    <p><strong>Gender:</strong> {{ gender }}</p>
+    <p><strong>Goal Weight:</strong> {{ goal_weight }} lbs</p>
+    
+    <br>
+    <a href="/dashboard">← Back to Dashboard</a>
+    <a href="/edit_profile" class="edit-btn">✏️ Edit Profile</a>
+
+  </div>
+</body>
+</html>
