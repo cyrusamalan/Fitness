@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fitness Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            margin: 0 auto;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .toggle {
+            color: #007bff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="login-form">
+        <h2>Login</h2>
+        <form method="POST" action="/login">
+            <input type="text" name="username" placeholder="Username" required><br>
+            <input type="password" name="password" placeholder="Password" required><br>
+            <button type="submit">Login</button>
+        </form>
+        <p class="toggle" onclick="toggleForm()">Don't have an account? Sign up</p>
+    </div>
+
+    <div class="container" id="signup-form" style="display: none;">
+        <h2>Create Account</h2>
+        <form method="POST" action="/signup">
+            <input type="text" name="first_name" placeholder="First Name" required><br>
+            <input type="text" name="last_name" placeholder="Last Name" required><br>
+            <input type="email" name="email" placeholder="Email" required><br>
+            <input type="text" name="phone_no" placeholder="Phone Number"><br>
+            <input type="text" name="username" placeholder="Username" required><br>
+            <input type="password" name="password" placeholder="Password" required><br>
+            <button type="submit">Create Account</button>
+        </form>
+        <p class="toggle" onclick="toggleForm()">Already have an account? Log in</p>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const login = document.getElementById("login-form");
+            const signup = document.getElementById("signup-form");
+            login.style.display = login.style.display === "none" ? "block" : "none";
+            signup.style.display = signup.style.display === "none" ? "block" : "none";
+        }
+    </script>
+</body>
+</html>

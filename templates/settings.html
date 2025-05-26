@@ -1,0 +1,36 @@
+<!-- templates/settings.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Account Info for {{ username }}</h2>
+        <p><strong>First Name:</strong> {{ first_name }}</p>
+        <p><strong>Last Name:</strong> {{ last_name }}</p>
+        <p><strong>Email:</strong> {{ email }}</p>
+        <p><strong>Phone Number:</strong> {{ phone_no or "Not provided" }}</p>
+        <br>
+        <a href="/dashboard">← Back to Dashboard</a>
+    </div>
+
+    
+
+</body>
+</html>
