@@ -46,4 +46,12 @@ create table daily_logs(
 	"date" date,
 	quantity int
 );
-
+create table profile(
+	user_id int primary key,
+	height_ft INT,
+	height_in INT,
+	weight int,
+	age int,
+	gender CHAR(1) CHECK (gender IN ('M', 'F')),
+	foreign key(user_id) references users(user_id)
+);
