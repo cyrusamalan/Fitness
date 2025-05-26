@@ -95,5 +95,43 @@ def dashboard():
         return redirect('/')
     return render_template('dashboard.html', username=username)
 
+@app.route('/settings')
+def settings():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT u.first_name, u.last_name, u.email, u.phone_no
+        FROM users u
+        JOIN authentication a ON u.user_id = a.user_id
+        WHERE a.username = %s
+    """, (username,))
+    
+    user_info = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if user_info:
+        first_name, last_name, email, phone_no = user_info
+        return render_template(
+            'settings.html',
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone_no=phone_no
+        )
+    else:
+        flash("❌ Could not load account info.")
+        return redirect('/dashboard')
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

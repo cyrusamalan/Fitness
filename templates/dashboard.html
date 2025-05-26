@@ -4,8 +4,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .settings-btn {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
+  <!-- Settings Button -->
+  <a href="/settings" class="settings-btn">⚙️ Settings</a>
+
   <h1>Welcome, {{ username }}!</h1>
   <p>This is your personalized dashboard.</p>
 </body>
