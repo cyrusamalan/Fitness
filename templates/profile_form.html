@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .container h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Edit Profile - {{ username }}</h2>
+    <form method="POST" action="/profile">
+      <label for="height_ft">Height (ft):</label>
+      <input type="number" name="height_ft" min="0" required>
+
+      <label for="height_in">Height (in):</label>
+      <input type="number" name="height_in" min="0" max="11" required>
+
+      <label for="weight">Weight (lbs):</label>
+      <input type="number" name="weight" min="0" required>
+
+      <label for="age">Age:</label>
+      <input type="number" name="age" min="0" required>
+
+      <label for="gender">Gender:</label>
+      <select name="gender" required>
+        <option value="">Select</option>
+        <option value="M">Male</option>
+        <option value="F">Female</option>
+      </select>
+
+      <button type="submit">Save Profile</button>
+    </form>
+  </div>
+</body>
+</html>

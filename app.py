@@ -188,15 +188,69 @@ def update_account():
 
     return redirect('/settings')
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     flash("👋 You have been logged out.")
     return redirect('/')
 
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
 
+    conn = get_db_connection()
+    cur = conn.cursor()
 
+    # Get user_id from username
+    cur.execute("""
+        SELECT u.user_id FROM users u
+        JOIN authentication a ON u.user_id = a.user_id
+        WHERE a.username = %s
+    """, (username,))
+    user_row = cur.fetchone()
+
+    if not user_row:
+        flash("❌ User not found.")
+        return redirect('/dashboard')
+
+    user_id = user_row[0]
+
+    if request.method == 'POST':
+        height_ft = request.form['height_ft']
+        height_in = request.form['height_in']
+        weight = request.form['weight']
+        age = request.form['age']
+        gender = request.form['gender'].upper()
+
+        try:
+            cur.execute("""
+                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (user_id)
+                DO UPDATE SET height_ft = EXCLUDED.height_ft,
+                              height_in = EXCLUDED.height_in,
+                              weight = EXCLUDED.weight,
+                              age = EXCLUDED.age,
+                              gender = EXCLUDED.gender;
+            """, (user_id, height_ft, height_in, weight, age, gender))
+            conn.commit()
+            flash("✅ Profile saved successfully!")
+        except Exception as e:
+            conn.rollback()
+            flash(f"❌ Error saving profile: {str(e)}")
+        finally:
+            cur.close()
+            conn.close()
+
+        return redirect('/dashboard')
+
+    # GET request – just show the form
+    cur.close()
+    conn.close()
+    return render_template('profile_form.html', username=username)
 
 
 
