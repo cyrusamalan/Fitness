@@ -129,6 +129,57 @@ def settings():
     else:
         flash("❌ Could not load account info.")
         return redirect('/dashboard')
+    
+@app.route('/update_account', methods=['POST'])
+def update_account():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    field = request.form['field']  # Which field is being updated
+
+    # Get the new value from the form
+    new_value = request.form.get(field)
+
+    # Build SQL statement dynamically but safely
+    allowed_fields = ['first_name', 'last_name', 'email', 'phone_no']
+    if field not in allowed_fields:
+        flash("❌ Invalid field.")
+        return redirect('/settings')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # Get the user_id
+        cur.execute("""
+            SELECT u.user_id FROM users u
+            JOIN authentication a ON u.user_id = a.user_id
+            WHERE a.username = %s
+        """, (username,))
+        user_id_result = cur.fetchone()
+
+        if user_id_result:
+            user_id = user_id_result[0]
+            cur.execute(
+                f"UPDATE users SET {field} = %s WHERE user_id = %s",
+                (new_value, user_id)
+            )
+            conn.commit()
+            flash(f"✅ {field.replace('_', ' ').title()} updated successfully!")
+        else:
+            flash("❌ User not found.")
+
+    except Exception as e:
+        conn.rollback()
+        flash(f"❌ Error updating {field}: {str(e)}")
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect('/settings')
+
 
 
 

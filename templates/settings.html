@@ -16,16 +16,65 @@
       border-radius: 10px;
       background-color: #f9f9f9;
     }
+    .field-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 5px 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Account Info for {{ username }}</h2>
-    <p><strong>First Name:</strong> {{ first_name }}</p>
-    <p><strong>Last Name:</strong> {{ last_name }}</p>
-    <p><strong>Email:</strong> {{ email }}</p>
-    <p><strong>Phone Number:</strong> {{ phone_no or "Not provided" }}</p>
-    <br>
+
+    <!-- Update First Name -->
+    <form method="POST" action="/update_account">
+      <div class="field-group">
+        <label>First Name:</label>
+        <input type="text" name="first_name" value="{{ first_name }}" required>
+        <button type="submit" name="field" value="first_name">Update</button>
+      </div>
+    </form>
+
+    <!-- Update Last Name -->
+    <form method="POST" action="/update_account">
+      <div class="field-group">
+        <label>Last Name:</label>
+        <input type="text" name="last_name" value="{{ last_name }}" required>
+        <button type="submit" name="field" value="last_name">Update</button>
+      </div>
+    </form>
+
+    <!-- Update Email -->
+    <form method="POST" action="/update_account">
+      <div class="field-group">
+        <label>Email:</label>
+        <input type="email" name="email" value="{{ email }}" required>
+        <button type="submit" name="field" value="email">Update</button>
+      </div>
+    </form>
+
+    <!-- Update Phone Number -->
+    <form method="POST" action="/update_account">
+      <div class="field-group">
+        <label>Phone Number:</label>
+        <input type="text" name="phone_no" value="{{ phone_no }}">
+        <button type="submit" name="field" value="phone_no">Update</button>
+      </div>
+    </form>
+
     <a href="/dashboard">← Back to Dashboard</a>
   </div>
 </body>
