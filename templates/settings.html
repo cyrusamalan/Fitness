@@ -75,6 +75,25 @@
       </div>
     </form>
 
+        <!-- Update Username -->
+    <form method="POST" action="/update_account">
+      <div class="field-group">
+        <label>Username:</label>
+        <input type="text" name="username" value="{{ username }}" required>
+        <button type="submit" name="field" value="username">Update</button>
+      </div>
+    </form>
+
+    <!-- Update Password -->
+    <form method="POST" action="/update_account">
+      <div class="field-group">
+        <label>New Password:</label>
+        <input type="password" name="password" placeholder="Enter new password" required>
+        <button type="submit" name="field" value="password">Update</button>
+      </div>
+    </form>
+
+
     <a href="/dashboard">← Back to Dashboard</a>
   </div>
 </body>

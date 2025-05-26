@@ -137,13 +137,10 @@ def update_account():
         flash("❌ You must log in first.")
         return redirect('/')
 
-    field = request.form['field']  # Which field is being updated
-
-    # Get the new value from the form
+    field = request.form['field']
     new_value = request.form.get(field)
 
-    # Build SQL statement dynamically but safely
-    allowed_fields = ['first_name', 'last_name', 'email', 'phone_no']
+    allowed_fields = ['first_name', 'last_name', 'email', 'phone_no', 'username', 'password']
     if field not in allowed_fields:
         flash("❌ Invalid field.")
         return redirect('/settings')
@@ -152,7 +149,7 @@ def update_account():
     cur = conn.cursor()
 
     try:
-        # Get the user_id
+        # Get the user_id from the session username
         cur.execute("""
             SELECT u.user_id FROM users u
             JOIN authentication a ON u.user_id = a.user_id
@@ -160,25 +157,37 @@ def update_account():
         """, (username,))
         user_id_result = cur.fetchone()
 
-        if user_id_result:
-            user_id = user_id_result[0]
-            cur.execute(
-                f"UPDATE users SET {field} = %s WHERE user_id = %s",
-                (new_value, user_id)
-            )
-            conn.commit()
-            flash(f"✅ {field.replace('_', ' ').title()} updated successfully!")
-        else:
+        if not user_id_result:
             flash("❌ User not found.")
+            return redirect('/settings')
+
+        user_id = user_id_result[0]
+
+        if field == 'password':
+            # Hash the new password before storing
+            import bcrypt
+            hashed_pw = bcrypt.hashpw(new_value.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            cur.execute("UPDATE authentication SET passkey = %s WHERE user_id = %s", (hashed_pw, user_id))
+        elif field == 'username':
+            cur.execute("UPDATE authentication SET username = %s WHERE user_id = %s", (new_value, user_id))
+            session['username'] = new_value  # update session
+        else:
+            # Other fields go to the users table
+            cur.execute(f"UPDATE users SET {field} = %s WHERE user_id = %s", (new_value, user_id))
+
+        conn.commit()
+        flash(f"✅ {field.replace('_', ' ').title()} updated successfully!")
 
     except Exception as e:
         conn.rollback()
         flash(f"❌ Error updating {field}: {str(e)}")
+
     finally:
         cur.close()
         conn.close()
 
     return redirect('/settings')
+
 
 @app.route('/logout')
 def logout():
