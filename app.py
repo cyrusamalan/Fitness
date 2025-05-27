@@ -167,7 +167,46 @@ def dashboard():
     if not username:
         flash("❌ You must log in first.")
         return redirect('/')
-    return render_template('dashboard.html', username=username)
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get user_id
+    cur.execute("""
+        SELECT user_id FROM authentication WHERE username = %s
+    """, (username,))
+    user_row = cur.fetchone()
+    if not user_row:
+        flash("❌ User not found.")
+        return redirect('/')
+    user_id = user_row[0]
+
+    # Get goal calories
+    cur.execute("SELECT daily_calories FROM goals WHERE user_id = %s", (user_id,))
+    goal_row = cur.fetchone()
+    daily_calories = goal_row[0] if goal_row else 0
+
+    # ✅ Get total calories logged today
+    cur.execute("""
+        SELECT SUM(calories)
+        FROM macros
+        WHERE user_id = %s AND date_added = CURRENT_DATE
+    """, (user_id,))
+    result = cur.fetchone()
+    current_calories = result[0] if result[0] is not None else 0
+
+    percent_eaten = round(current_calories / daily_calories * 100, 1) if daily_calories else 0
+
+    cur.close()
+    conn.close()
+
+    return render_template('dashboard.html',
+                           username=username,
+                           current_calories=current_calories,
+                           daily_calories=daily_calories,
+                           percent_eaten=percent_eaten)
+
+
 
 @app.route('/settings')
 @nocache
@@ -464,6 +503,53 @@ def edit_profile():
     else:
         flash("❌ No profile data to edit.")
         return redirect('/profile')
+    
+@app.route('/log_food', methods=['GET', 'POST'])
+@nocache
+def log_food():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get user_id from session username
+    cur.execute("""
+        SELECT user_id FROM authentication WHERE username = %s
+    """, (username,))
+    user_row = cur.fetchone()
+    if not user_row:
+        flash("❌ User not found.")
+        return redirect('/dashboard')
+    user_id = user_row[0]
+
+    if request.method == 'POST':
+        item = request.form['item']
+        calories = request.form['calories']
+        protein = request.form['protein']
+        carbs = request.form['carbs']
+        fat = request.form['fat']
+
+        try:
+            cur.execute("""
+                INSERT INTO macros (user_id, item, calories, protein, carbs, fat, date_added)
+                VALUES (%s, %s, %s, %s, %s, %s, NOW())
+            """, (user_id, item, calories, protein, carbs, fat))
+            conn.commit()
+            flash("✅ Food logged successfully!")
+            return redirect('/dashboard')
+        except Exception as e:
+            conn.rollback()
+            flash(f"❌ Error logging food: {str(e)}")
+        finally:
+            cur.close()
+            conn.close()
+
+    return render_template('log_food.html')
+
+
     
 
 

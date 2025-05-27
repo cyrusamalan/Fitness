@@ -1,0 +1,19 @@
+<h2>Log Food Entry</h2>
+<form method="POST" action="{{ url_for('log_food') }}">
+  <label>Food Item:</label><br>
+  <input type="text" name="item" required><br><br>
+
+  <label>Calories:</label><br>
+  <input type="number" name="calories" required><br><br>
+
+  <label>Protein (g):</label><br>
+  <input type="number" name="protein"><br><br>
+
+  <label>Carbs (g):</label><br>
+  <input type="number" name="carbs"><br><br>
+
+  <label>Fat (g):</label><br>
+  <input type="number" name="fat"><br><br>
+
+  <button type="submit">Add Entry</button>
+</form>
