@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Food Diary</title>
+  <style>
+    body {
+      background-color: #2c2c2c; /* light grey background */
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .diary-container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #2c2c2c;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #232020;
+    }
+
+    h2 {
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .center-btn {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .no-entries {
+      text-align: center;
+      font-style: italic;
+      margin-top: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="diary-container">
+    <h2>Today's Food Diary</h2>
+
+    {% if entries %}
+      <table>
+        <tr>
+          <th>Item</th>
+          <th>Calories</th>
+          <th>Protein (g)</th>
+          <th>Carbs (g)</th>
+          <th>Fat (g)</th>
+        </tr>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry[0] }}</td>
+          <td>{{ entry[1] }}</td>
+          <td>{{ entry[2] }}</td>
+          <td>{{ entry[3] }}</td>
+          <td>{{ entry[4] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="no-entries">No food logged today.</p>
+    {% endif %}
+
+    <div class="center-btn">
+      <a href="{{ url_for('dashboard') }}"><button>Back to Dashboard</button></a>
+    </div>
+  </div>
+
+</body>
+</html>

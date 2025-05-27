@@ -549,6 +549,40 @@ def log_food():
 
     return render_template('log_food.html')
 
+@app.route('/diary')
+@nocache
+def diary():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Get user_id
+    cur.execute("""
+        SELECT user_id FROM authentication WHERE username = %s
+    """, (username,))
+    user_row = cur.fetchone()
+    if not user_row:
+        flash("❌ User not found.")
+        return redirect('/dashboard')
+    user_id = user_row[0]
+
+    # Get today’s logged foods
+    cur.execute("""
+        SELECT item, calories, protein, carbs, fat
+        FROM macros
+        WHERE user_id = %s AND date_added = CURRENT_DATE
+        ORDER BY macro_id DESC
+    """, (user_id,))
+    entries = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template('diary.html', username=username, entries=entries)
 
     
 
