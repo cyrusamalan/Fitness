@@ -242,13 +242,12 @@ def profile():
         gender = request.form['gender'].upper()
         goal_weight = request.form['goal_weight']
         goal_type = request.form['goal_type']
-
-
+        activity_level = request.form['activity_level']
 
         try:
             cur.execute("""
-                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type, activity_level)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id)
                 DO UPDATE SET height_ft = EXCLUDED.height_ft,
                             height_in = EXCLUDED.height_in,
@@ -256,8 +255,9 @@ def profile():
                             age = EXCLUDED.age,
                             gender = EXCLUDED.gender,
                             goal_weight = EXCLUDED.goal_weight,
-                            goal_type = EXCLUDED. goal_type;
-            """, (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type))
+                            goal_type = EXCLUDED. goal_type,
+                            activity_level = EXCLUDED.activity_level;
+            """, (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type, activity_level))
             conn.commit()
             flash("✅ Profile saved successfully!")
         except Exception as e:
@@ -324,6 +324,8 @@ def edit_profile():
         gender = request.form['gender'].upper()
         goal_weight = request.form['goal_weight']
         goal_type = request.form['goal_type']
+        activity_level = request.form['activity_level']
+
 
         try:
             cur.execute("""
@@ -334,9 +336,10 @@ def edit_profile():
                     age = %s,
                     gender = %s,
                     goal_weight = %s,
-                    goal_type = %s
+                    goal_type = %s,
+                    activity_level = %s
                 WHERE user_id = %s
-            """, (height_ft, height_in, weight, age, gender, goal_weight, goal_type, user_id))
+            """, (height_ft, height_in, weight, age, gender, goal_weight, goal_type, activity_level, user_id))
             conn.commit()
             flash("✅ Profile updated successfully!")
         except Exception as e:
