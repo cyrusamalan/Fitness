@@ -70,6 +70,20 @@
 </head>
 <body>
 
+    <div style="position: fixed; top: 20px; left: 20px; z-index: 999;">
+  <a href="{{ url_for('dashboard') }}" 
+     style="
+       background-color: #007bff; 
+       color: white; 
+       padding: 8px 16px; 
+       text-decoration: none; 
+       border-radius: 6px;
+       font-weight: bold;
+     ">
+    ⬅ Dashboard
+  </a>
+</div>
+
   <div class="diary-container">
     <h2>Today's Food Diary</h2>
 
@@ -104,10 +118,6 @@
       <p class="no-entries">No food logged today.</p>
     {% endif %}
 
-    <div class="center-btn">
-      <a href="{{ url_for('dashboard') }}"><button>Back to Dashboard</button></a>
-    </div>
-  </div>
 
 </body>
 </html>
