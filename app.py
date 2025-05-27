@@ -241,20 +241,23 @@ def profile():
         age = request.form['age']
         gender = request.form['gender'].upper()
         goal_weight = request.form['goal_weight']
+        goal_type = request.form['goal_type']
+
 
 
         try:
             cur.execute("""
-                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender, goal_weight)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (user_id)
                 DO UPDATE SET height_ft = EXCLUDED.height_ft,
                             height_in = EXCLUDED.height_in,
                             weight = EXCLUDED.weight,
                             age = EXCLUDED.age,
                             gender = EXCLUDED.gender,
-                            goal_weight = EXCLUDED.goal_weight;
-            """, (user_id, height_ft, height_in, weight, age, gender, goal_weight))
+                            goal_weight = EXCLUDED.goal_weight,
+                            goal_type = EXCLUDED. goal_type;
+            """, (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type))
             conn.commit()
             flash("✅ Profile saved successfully!")
         except Exception as e:
@@ -320,6 +323,7 @@ def edit_profile():
         age = request.form['age']
         gender = request.form['gender'].upper()
         goal_weight = request.form['goal_weight']
+        goal_type = request.form['goal_type']
 
         try:
             cur.execute("""
@@ -329,9 +333,10 @@ def edit_profile():
                     weight = %s,
                     age = %s,
                     gender = %s,
-                    goal_weight = %s
+                    goal_weight = %s,
+                    goal_type = %s
                 WHERE user_id = %s
-            """, (height_ft, height_in, weight, age, gender, goal_weight, user_id))
+            """, (height_ft, height_in, weight, age, gender, goal_weight, goal_type, user_id))
             conn.commit()
             flash("✅ Profile updated successfully!")
         except Exception as e:
