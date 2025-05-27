@@ -5,6 +5,66 @@ from datetime import datetime
 from functools import wraps
 from flask import make_response
 
+def insert_goals(cur, user_id, weight, height_ft, height_in, age, gender, goal_type, activity_level):
+    total_height_cm = height_ft * 30.48 + height_in * 2.54
+    weight_kg = weight * 0.453592
+
+    if gender == 'M':
+        bmr = 10 * weight_kg + 6.25 * total_height_cm - 5 * age + 5
+    else:
+        bmr = 10 * weight_kg + 6.25 * total_height_cm - 5 * age - 161
+
+    activity_factors = {
+        'sedentary': 1.2,
+        'light': 1.375,
+        'moderate': 1.55,
+        'very_active': 1.725,
+        'extra_active': 1.9
+    }
+    multiplier = activity_factors.get(activity_level, 1.55)
+    maintenance_calories = int(bmr * multiplier)
+
+    # Adjust daily calories based on goal type (even though it's not stored)
+    if goal_type == 'cut':
+        daily_calories = maintenance_calories - 500
+    elif goal_type == 'bulk':
+        daily_calories = maintenance_calories + 500
+    else:
+        daily_calories = maintenance_calories
+
+    # Macronutrient distribution
+    daily_protein = int(weight * 0.7)  
+    daily_fats = int((daily_calories * 0.2) / 9)   # 20% of calories → grams of fat
+    daily_carbs = int((daily_calories * 0.25) / 4) 
+
+    # Insert into or update goals table
+    cur.execute("""
+        INSERT INTO goals (
+            user_id, daily_calories, daily_protein, daily_carbs, daily_fats,
+            maintenance_calories, gain_weight_calories, lose_weight_calories
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (user_id)
+        DO UPDATE SET
+            daily_calories = EXCLUDED.daily_calories,
+            daily_protein = EXCLUDED.daily_protein,
+            daily_carbs = EXCLUDED.daily_carbs,
+            daily_fats = EXCLUDED.daily_fats,
+            maintenance_calories = EXCLUDED.maintenance_calories,
+            gain_weight_calories = EXCLUDED.gain_weight_calories,
+            lose_weight_calories = EXCLUDED.lose_weight_calories;
+    """, (
+        user_id,
+        daily_calories,
+        daily_protein,
+        daily_carbs,
+        daily_fats,
+        maintenance_calories,
+        maintenance_calories + 500,
+        maintenance_calories - 500
+    ))
+
+
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # used for flashing messages
 
@@ -244,6 +304,7 @@ def profile():
         goal_type = request.form['goal_type']
         activity_level = request.form['activity_level']
 
+
         try:
             cur.execute("""
                 INSERT INTO profile (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type, activity_level)
@@ -258,6 +319,19 @@ def profile():
                             goal_type = EXCLUDED. goal_type,
                             activity_level = EXCLUDED.activity_level;
             """, (user_id, height_ft, height_in, weight, age, gender, goal_weight, goal_type, activity_level))
+
+            insert_goals(
+            cur,
+            user_id=user_id,
+            weight=int(weight),
+            height_ft=int(height_ft),
+            height_in=int(height_in),
+            age=int(age),
+            gender=gender,
+            goal_type=goal_type,  # still used for calculation
+            activity_level=activity_level
+            )
+
             conn.commit()
             flash("✅ Profile saved successfully!")
         except Exception as e:
@@ -340,6 +414,21 @@ def edit_profile():
                     activity_level = %s
                 WHERE user_id = %s
             """, (height_ft, height_in, weight, age, gender, goal_weight, goal_type, activity_level, user_id))
+
+
+
+            insert_goals(
+            cur,
+            user_id=user_id,
+            weight=int(weight),
+            height_ft=int(height_ft),
+            height_in=int(height_in),
+            age=int(age),
+            gender=gender,
+            goal_type=goal_type,  # still used for calculation
+            activity_level=activity_level
+            )
+
             conn.commit()
             flash("✅ Profile updated successfully!")
         except Exception as e:
