@@ -546,8 +546,23 @@ def log_food():
         finally:
             cur.close()
             conn.close()
+        return redirect('/log_food')  # Ensures you return after POST
 
-    return render_template('log_food.html')
+    # ✅ GET: Fetch recent items to display as quick-add
+    cur.execute("""
+        SELECT item, calories, protein, carbs, fat
+        FROM macros
+        WHERE user_id = %s
+        ORDER BY date_added DESC
+        LIMIT 10
+    """, (user_id,))
+    recent_items = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template('log_food.html', recent_items=recent_items)
+
 
 @app.route('/diary')
 @nocache

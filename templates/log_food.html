@@ -1,7 +1,7 @@
 <h2>Log Food Entry</h2>
 <form method="POST" action="{{ url_for('log_food') }}">
   <label>Food Item:</label><br>
-  <input type="text" name="item" required><br><br>
+  <input type="text" name="item" id="item" required><br><br>
 
   <label>Calories:</label><br>
   <input type="number" name="calories" required><br><br>
@@ -17,3 +17,38 @@
 
   <button type="submit">Add Entry</button>
 </form>
+
+{% if recent_items %}
+  <h3>Quick Add Recent Items:</h3>
+  <ul>
+    {% for item in recent_items %}
+      <li>
+        <button type="button" class="quick-add"
+          data-item="{{ item[0] }}"
+          data-calories="{{ item[1] }}"
+          data-protein="{{ item[2] }}"
+          data-carbs="{{ item[3] }}"
+          data-fat="{{ item[4] }}">
+          {{ item[0] }}
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const buttons = document.querySelectorAll('.quick-add');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('item').value = btn.dataset.item;
+      document.querySelector('input[name="calories"]').value = btn.dataset.calories;
+      document.querySelector('input[name="protein"]').value = btn.dataset.protein;
+      document.querySelector('input[name="carbs"]').value = btn.dataset.carbs;
+      document.querySelector('input[name="fat"]').value = btn.dataset.fat;
+    });
+  });
+});
+</script>
