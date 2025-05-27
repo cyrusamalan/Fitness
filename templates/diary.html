@@ -75,23 +75,31 @@
 
     {% if entries %}
       <table>
-        <tr>
-          <th>Item</th>
-          <th>Calories</th>
-          <th>Protein (g)</th>
-          <th>Carbs (g)</th>
-          <th>Fat (g)</th>
-        </tr>
-        {% for entry in entries %}
-        <tr>
-          <td>{{ entry[0] }}</td>
-          <td>{{ entry[1] }}</td>
-          <td>{{ entry[2] }}</td>
-          <td>{{ entry[3] }}</td>
-          <td>{{ entry[4] }}</td>
-        </tr>
-        {% endfor %}
-      </table>
+  <tr>
+    <th>Item</th>
+    <th>Calories</th>
+    <th>Protein (g)</th>
+    <th>Carbs (g)</th>
+    <th>Fat (g)</th>
+    <th>Delete</th> <!-- new column -->
+  </tr>
+  {% for entry in entries %}
+  <tr>
+    <td>{{ entry[0] }}</td>
+    <td>{{ entry[1] }}</td>
+    <td>{{ entry[2] }}</td>
+    <td>{{ entry[3] }}</td>
+    <td>{{ entry[4] }}</td>
+    <td>{{ entry[5] }}</td>
+    <td>
+      <form method="POST" action="{{ url_for('delete_food', macro_id=entry[6]) }}" style="margin: 0;">
+        <button type="submit" title="Delete" style="background: none; border: none; color: red; font-size: 18px;">−</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
     {% else %}
       <p class="no-entries">No food logged today.</p>
     {% endif %}

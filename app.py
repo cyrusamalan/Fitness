@@ -570,9 +570,9 @@ def diary():
         return redirect('/dashboard')
     user_id = user_row[0]
 
-    # Get today’s logged foods
+    # ✅ This is the query you're asking about — put it here:
     cur.execute("""
-        SELECT item, calories, protein, carbs, fat
+        SELECT item, calories, protein, carbs, fat, date_added, macro_id
         FROM macros
         WHERE user_id = %s AND date_added = CURRENT_DATE
         ORDER BY macro_id DESC
@@ -584,7 +584,36 @@ def diary():
 
     return render_template('diary.html', username=username, entries=entries)
 
-    
+
+@app.route('/delete_food/<int:macro_id>', methods=['POST'])
+def delete_food(macro_id):
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        # Optional: ensure only that user can delete their own entry
+        cur.execute("""
+            DELETE FROM macros
+            WHERE macro_id = %s AND user_id = (
+                SELECT user_id FROM authentication WHERE username = %s
+            )
+        """, (macro_id, username))
+        conn.commit()
+        flash("🗑️ Entry deleted.")
+    except Exception as e:
+        conn.rollback()
+        flash(f"❌ Could not delete entry: {str(e)}")
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect('/diary')
+
 
 
 if __name__ == '__main__':
