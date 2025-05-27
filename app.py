@@ -550,11 +550,10 @@ def log_food():
 
     # ✅ GET: Fetch recent items to display as quick-add
     cur.execute("""
-        SELECT item, calories, protein, carbs, fat
-        FROM macros
-        WHERE user_id = %s
-        ORDER BY date_added DESC
-        LIMIT 10
+    SELECT DISTINCT ON (item) item, calories, protein, carbs, fat
+    FROM macros
+    WHERE user_id = %s
+    ORDER BY item, date_added DESC
     """, (user_id,))
     recent_items = cur.fetchall()
 
@@ -562,7 +561,6 @@ def log_food():
     conn.close()
 
     return render_template('log_food.html', recent_items=recent_items)
-
 
 @app.route('/diary')
 @nocache

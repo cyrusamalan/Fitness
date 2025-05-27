@@ -1,45 +1,107 @@
-<h2>Log Food Entry</h2>
-<form method="POST" action="{{ url_for('log_food') }}">
-  <label>Food Item:</label><br>
-  <input type="text" name="item" id="item" required><br><br>
+<style>
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
 
-  <label>Calories:</label><br>
-  <input type="number" name="calories" required><br><br>
+  .flex-wrapper {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
 
-  <label>Protein (g):</label><br>
-  <input type="number" name="protein"><br><br>
+  .form-section, .quickadd-section {
+    flex: 1;
+    min-width: 320px;
+  }
 
-  <label>Carbs (g):</label><br>
-  <input type="number" name="carbs"><br><br>
+  #quickAddContainer {
+    background-color: #2c2c2c;
+    padding: 15px;
+    border-radius: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #555;
+    color: white;
+  }
 
-  <label>Fat (g):</label><br>
-  <input type="number" name="fat"><br><br>
+  .quick-add {
+    cursor: pointer;
+    margin-bottom: 8px;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #3a3a3a;
+  }
 
-  <button type="submit">Add Entry</button>
-</form>
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 6px;
+  }
 
-{% if recent_items %}
-  <h3>Quick Add Recent Items:</h3>
-  <ul>
-    {% for item in recent_items %}
-      <li>
-        <button type="button" class="quick-add"
-          data-item="{{ item[0] }}"
-          data-calories="{{ item[1] }}"
-          data-protein="{{ item[2] }}"
-          data-carbs="{{ item[3] }}"
-          data-fat="{{ item[4] }}">
-          {{ item[0] }}
-        </button>
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
+  button {
+    padding: 8px 12px;
+  }
+</style>
 
+<div class="container">
+  <div class="flex-wrapper">
+
+    <!-- Log Food Entry Form -->
+    <div class="form-section">
+      <h2>Log Food Entry</h2>
+      <form method="POST" action="{{ url_for('log_food') }}">
+        <label>Food Item:</label><br>
+        <input type="text" name="item" id="item" required><br><br>
+
+        <label>Calories:</label><br>
+        <input type="number" name="calories" required><br><br>
+
+        <label>Protein (g):</label><br>
+        <input type="number" name="protein"><br><br>
+
+        <label>Carbs (g):</label><br>
+        <input type="number" name="carbs"><br><br>
+
+        <label>Fat (g):</label><br>
+        <input type="number" name="fat"><br><br>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button type="submit">Add Entry</button>
+          <button type="button" onclick="clearForm()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Quick Add Section -->
+    <div class="quickadd-section">
+      <h3>Quick Add from Previous Entries</h3>
+      <input type="text" id="searchBox" placeholder="Search your foods..." style="width: 100%; padding: 8px; margin-bottom: 10px;">
+
+      <div id="quickAddContainer">
+        {% for item in recent_items %}
+          {% if item[0] %}
+          <div class="quick-add" 
+               data-item="{{ item[0] }}" 
+               data-calories="{{ item[1] }}" 
+               data-protein="{{ item[2] }}" 
+               data-carbs="{{ item[3] }}" 
+               data-fat="{{ item[4] }}">
+            {{ item[0] }} — {{ item[1] }} cal, {{ item[2] }}g protein, {{ item[3] }}g carbs, {{ item[4] }}g fat
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const buttons = document.querySelectorAll('.quick-add');
+  const searchBox = document.getElementById('searchBox');
 
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -50,5 +112,21 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelector('input[name="fat"]').value = btn.dataset.fat;
     });
   });
+
+  searchBox.addEventListener("input", () => {
+    const filter = searchBox.value.toLowerCase();
+    buttons.forEach(btn => {
+      const text = btn.textContent.toLowerCase();
+      btn.style.display = text.includes(filter) ? "block" : "none";
+    });
+  });
 });
+
+function clearForm() {
+  document.querySelector('input[name="item"]').value = '';
+  document.querySelector('input[name="calories"]').value = '';
+  document.querySelector('input[name="protein"]').value = '';
+  document.querySelector('input[name="carbs"]').value = '';
+  document.querySelector('input[name="fat"]').value = '';
+}
 </script>
