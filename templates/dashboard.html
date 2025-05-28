@@ -102,6 +102,8 @@
       font-size: 1.2em;
     }
 
+    
+
 
   </style>
 </head>
@@ -109,7 +111,25 @@
 
   <!-- Navigation buttons -->
   <a href="/settings" class="settings-btn">⚙️ Settings</a>
-  <a href="/logout" class="logout-btn">🚪 Logout</a>
+
+<div style="position: fixed; top: 20px; right: 1380px; z-index: 999;">
+  <button onclick="toggleLogoutPrompt()" 
+          style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold;">
+    Logout
+  </button>
+
+  <div id="logoutPrompt" style="display: none; margin-top: 5px; background-color: #444; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+    <p style="color: white; margin: 0 0 8px 0;">Are you sure you want to logout?</p>
+    <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; margin-right: 10px;">
+      <button style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px;">Yes</button>
+    </a>
+    <button onclick="toggleLogoutPrompt()" 
+            style="background-color: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px;">
+      No
+    </button>
+  </div>
+</div>
+
   <a href="/profile" class="profile-btn">👤 Profile</a>
 
   <!-- Dashboard welcome box -->
@@ -117,6 +137,14 @@
     <h1>Welcome, {{ username }}!</h1>
     <p>This is your personalized dashboard.</p>
   </div>
+
+<div style="display: flex; gap: 10px; padding: 10px;">
+  <a href="{{ url_for('log_food') }}" style="color: white; text-decoration: none;">🍽 Log Food</a>
+  <a href="{{ url_for('nutrition') }}" style="color: white; text-decoration: none;">🧪 Nutrients</a>
+  <a href="{{ url_for('calendar') }}" style="color: white; text-decoration: none;">📅 Calendar</a>
+</div>
+
+
 
   <div class="calorie-progress-container">
   <svg viewBox="0 0 36 36" class="circular-chart" width="250" height="250">
@@ -137,11 +165,10 @@
   <h2>Calories Today</h2>
   <p><strong>{{ current_calories }}</strong> / {{ daily_calories }} kcal consumed</p>
 </div>
-<div class="log-food" style="text-align: center; margin-top: 2em;">
-  <a href="{{ url_for('log_food') }}">
-    <button style="padding: 10px 20px; font-size: 16px;">Log Food</button>
-  </a>
-</div>
+
+
+
+
 
 <div style="text-align: center; margin-top: 1.5em;">
   <a href="{{ url_for('diary') }}">
@@ -153,3 +180,10 @@
 
 </body>
 </html>
+
+<script>
+function toggleLogoutPrompt() {
+  const prompt = document.getElementById('logoutPrompt');
+  prompt.style.display = (prompt.style.display === 'none') ? 'block' : 'none';
+}
+</script>

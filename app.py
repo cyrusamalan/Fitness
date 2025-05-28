@@ -4,6 +4,8 @@ import bcrypt
 from datetime import datetime
 from functools import wraps
 from flask import make_response
+from calendar import monthrange, Calendar
+from datetime import datetime
 
 def insert_goals(cur, user_id, weight, height_ft, height_in, age, gender, goal_type, activity_level):
     total_height_cm = height_ft * 30.48 + height_in * 2.54
@@ -626,6 +628,109 @@ def delete_food(macro_id):
         conn.close()
 
     return redirect('/diary')
+
+@app.route('/nutrition')
+@nocache
+def nutrition():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT user_id FROM authentication WHERE username = %s
+    """, (username,))
+    user_id = cur.fetchone()[0]
+
+    cur.execute("""
+        SELECT daily_protein, daily_carbs, daily_fats FROM goals WHERE user_id = %s
+    """, (user_id,))
+    goals = cur.fetchone()
+
+    cur.execute("""
+        SELECT COALESCE(SUM(protein), 0), COALESCE(SUM(carbs), 0), COALESCE(SUM(fat), 0)
+        FROM macros WHERE user_id = %s AND date_added = CURRENT_DATE
+    """, (user_id,))
+    totals = cur.fetchone()
+
+    conn.close()
+
+    nutrients = [
+        {
+            'name': 'Protein',
+            'total': totals[0],
+            'goal': goals[0],
+            'remaining': max(0, goals[0] - totals[0]),
+            'percent': min(100, int((totals[0] / goals[0]) * 100)),
+            'class': 'protein'
+        },
+        {
+            'name': 'Carbohydrates',
+            'total': totals[1],
+            'goal': goals[1],
+            'remaining': max(0, goals[1] - totals[1]),
+            'percent': min(100, int((totals[1] / goals[1]) * 100)),
+            'class': 'carbs'
+        },
+        {
+            'name': 'Fats',
+            'total': totals[2],
+            'goal': goals[2],
+            'remaining': max(0, goals[2] - totals[2]),
+            'percent': min(100, int((totals[2] / goals[2]) * 100)),
+            'class': 'fat'
+        },
+    ]
+
+    return render_template('nutrition.html', nutrients=nutrients)
+
+
+@app.route('/calendar')
+@nocache
+def calendar():
+    username = session.get('username')
+    if not username:
+        flash("❌ You must log in first.")
+        return redirect('/')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT user_id FROM authentication WHERE username = %s", (username,))
+    user_id = cur.fetchone()[0]
+
+    today = datetime.today()
+    year = today.year
+    month = today.month
+    cal = Calendar()
+    days_in_month = monthrange(year, month)[1]
+
+    # Pull daily calorie & protein totals
+    cur.execute("""
+        SELECT date_added, SUM(calories), SUM(protein)
+        FROM macros
+        WHERE user_id = %s AND date_added BETWEEN %s AND %s
+        GROUP BY date_added
+    """, (user_id, f"{year}-{month:02d}-01", f"{year}-{month:02d}-{days_in_month}"))
+    results = cur.fetchall()
+
+    daily_data = {
+        row[0].strftime('%Y-%m-%d'): {'calories': row[1], 'protein': row[2]}
+        for row in results
+    }
+
+    # Get the calendar weeks (list of weeks, each week is list of days)
+    month_days = list(cal.itermonthdays(year, month))  # flat list of 42 values (0 = blank)
+    weeks = [month_days[i:i+7] for i in range(0, len(month_days), 7)]
+
+    cur.close()
+    conn.close()
+
+    return render_template('calendar.html', year=year, month=month, weeks=weeks, daily_data=daily_data)
+
 
 
 

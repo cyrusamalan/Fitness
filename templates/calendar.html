@@ -1,0 +1,25 @@
+<h2 style="color:white;">📅 {{ month }}/{{ year }} — Nutrition Calendar</h2>
+<table>
+  <tr>
+    <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+    <th>Thu</th><th>Fri</th><th>Sat</th>
+  </tr>
+  {% for week in weeks %}
+    <tr>
+      {% for day in week %}
+        {% if day == 0 %}
+          <td></td>
+        {% else %}
+          {% set date_str = '{}-{:02d}-{:02d}'.format(year, month, day) %}
+          <td>
+            <div class="day-number">{{ day }}</div>
+            {% if date_str in daily_data %}
+              <div class="entry">{{ daily_data[date_str].calories }} cal</div>
+              <div class="entry">{{ daily_data[date_str].protein }}g protein</div>
+            {% endif %}
+          </td>
+        {% endif %}
+      {% endfor %}
+    </tr>
+  {% endfor %}
+</table>

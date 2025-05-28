@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nutrient Tracker</title>
+  <style>
+    body {
+      background-color: #1c1c1c;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .nutrient-section {
+      background-color: #2c2c2c;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .nutrient-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .progress-bar {
+      background-color: #444;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      transition: width 0.3s ease-in-out;
+    }
+    .protein { background-color: #ffcc00; }
+    .carbs { background-color: #00bcd4; }
+    .fat { background-color: #e91e63; }
+  </style>
+</head>
+<body>
+
+  <h2>Nutrient Overview</h2>
+
+  {% for nutrient in nutrients %}
+  <div class="nutrient-section">
+    <div class="nutrient-label">
+      <strong>{{ nutrient.name }}</strong>
+      <span>{{ nutrient.total }} / {{ nutrient.goal }}g</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill {{ nutrient.class }}" style="width: {{ nutrient.percent }}%;"></div>
+    </div>
+    <small>{{ nutrient.remaining }}g left</small>
+  </div>
+  {% endfor %}
+
+</body>
+</html>
