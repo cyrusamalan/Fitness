@@ -1,25 +1,98 @@
-<h2 style="color:white;">📅 {{ month }}/{{ year }} — Nutrition Calendar</h2>
-<table>
-  <tr>
-    <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
-    <th>Thu</th><th>Fri</th><th>Sat</th>
-  </tr>
-  {% for week in weeks %}
-    <tr>
-      {% for day in week %}
-        {% if day == 0 %}
-          <td></td>
-        {% else %}
-          {% set date_str = '{}-{:02d}-{:02d}'.format(year, month, day) %}
-          <td>
-            <div class="day-number">{{ day }}</div>
-            {% if date_str in daily_data %}
-              <div class="entry">{{ daily_data[date_str].calories }} cal</div>
-              <div class="entry">{{ daily_data[date_str].protein }}g protein</div>
-            {% endif %}
-          </td>
-        {% endif %}
-      {% endfor %}
-    </tr>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nutrition Calendar</title>
+  <style>
+    body {
+      background-color: #1c1c1c;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .calendar-container {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      margin: 20px;
+      border: 1px solid #444;
+    }
+
+    .calendar-header, .calendar-day {
+      padding: 10px;
+      min-height: 90px;
+      border: 1px solid #444;
+      box-sizing: border-box;
+    }
+
+    .calendar-header {
+      background-color: #2c2c2c;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .calendar-day {
+      background-color: #2a2a2a;
+      position: relative;
+      vertical-align: top;
+    }
+
+    .day-number {
+      font-weight: bold;
+    }
+
+    .entry {
+      font-size: 14px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+
+    <div style="position: fixed; top: 20px; left: 20px; z-index: 999;">
+  <a href="{{ url_for('dashboard') }}" 
+     style="
+       background-color: #007bff; 
+       color: white; 
+       padding: 8px 16px; 
+       text-decoration: none; 
+       border-radius: 6px;
+       font-weight: bold;
+     ">
+    ⬅ Dashboard
+  </a>
+</div>
+
+<h2>{{ month }}/{{ year }} Nutrition Calendar</h2>
+
+<div class="calendar-container">
+  {% for day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] %}
+    <div class="calendar-header">{{ day }}</div>
   {% endfor %}
-</table>
+
+  {% for week in weeks %}
+    {% for day in week %}
+      {% if day == 0 %}
+        <div class="calendar-day"></div>
+      {% else %}
+        {% set date_str = '{}-{:02d}-{:02d}'.format(year, month, day) %}
+        <div class="calendar-day">
+          <div class="day-number">{{ day }}</div>
+          {% if date_str in daily_data %}
+            <div class="entry">{{ daily_data[date_str].calories }} cal</div>
+            <div class="entry">{{ daily_data[date_str].protein }}g protein</div>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+</div>
+
+</body>
+</html>
