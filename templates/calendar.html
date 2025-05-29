@@ -39,7 +39,6 @@
 
     .calendar-day {
       background-color: #2a2a2a;
-      position: relative;
       vertical-align: top;
     }
 
@@ -55,13 +54,13 @@
 </head>
 <body>
 
-    <div style="position: fixed; top: 20px; left: 20px; z-index: 999;">
-  <a href="{{ url_for('dashboard') }}" 
+<div style="position: fixed; top: 20px; left: 20px; z-index: 999;">
+  <a href="{{ url_for('dashboard') }}"
      style="
-       background-color: #007bff; 
-       color: white; 
-       padding: 8px 16px; 
-       text-decoration: none; 
+       background-color: #007bff;
+       color: white;
+       padding: 8px 16px;
+       text-decoration: none;
        border-radius: 6px;
        font-weight: bold;
      ">
@@ -81,12 +80,30 @@
       {% if day == 0 %}
         <div class="calendar-day"></div>
       {% else %}
-        {% set date_str = '{}-{:02d}-{:02d}'.format(year, month, day) %}
+        {% set date_str = "{:04d}-{:02d}-{:02d}".format(year, month, day) %}
+        {% set data = daily_data.get(date_str) %}
+        {% if data %}
+          {% set cal_diff = (data.calories - goal_calories)|abs %}
+          {% set prot_diff = (data.protein - goal_protein)|abs %}
+
+          {% if cal_diff <= 100 and prot_diff <= 20 %}
+            {% set color = 'lightgreen' %}
+          {% elif cal_diff <= 100 %}
+            {% set color = 'orange' %}
+          {% else %}
+            {% set color = 'red' %}
+          {% endif %}
+        {% else %}
+          {% set color = 'inherit' %}
+        {% endif %}
+
         <div class="calendar-day">
           <div class="day-number">{{ day }}</div>
-          {% if date_str in daily_data %}
-            <div class="entry">{{ daily_data[date_str].calories }} cal</div>
-            <div class="entry">{{ daily_data[date_str].protein }}g protein</div>
+          {% if data %}
+            <div class="entry" style="color: {{ color }}">
+              {{ data.calories }} cal<br>
+              {{ data.protein }}g protein
+            </div>
           {% endif %}
         </div>
       {% endif %}

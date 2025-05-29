@@ -687,7 +687,6 @@ def nutrition():
 
     return render_template('nutrition.html', nutrients=nutrients)
 
-
 @app.route('/calendar')
 @nocache
 def calendar():
@@ -699,8 +698,15 @@ def calendar():
     conn = get_db_connection()
     cur = conn.cursor()
 
+    # Get user_id
     cur.execute("SELECT user_id FROM authentication WHERE username = %s", (username,))
-    user_id = cur.fetchone()[0]
+    user_row = cur.fetchone()
+    if not user_row:
+        cur.close()
+        conn.close()
+        flash("❌ User not found.")
+        return redirect('/')
+    user_id = user_row[0]
 
     today = datetime.today()
     year = today.year
@@ -708,28 +714,59 @@ def calendar():
     cal = Calendar()
     days_in_month = monthrange(year, month)[1]
 
-    # Pull daily calorie & protein totals
+    # Fetch daily goals
+    cur.execute("SELECT daily_calories, daily_protein FROM goals WHERE user_id = %s", (user_id,))
+    goal_row = cur.fetchone()
+    goal_calories, goal_protein = goal_row if goal_row else (0, 0)
+
+    # Get actual daily totals
     cur.execute("""
         SELECT date_added, SUM(calories), SUM(protein)
         FROM macros
         WHERE user_id = %s AND date_added BETWEEN %s AND %s
         GROUP BY date_added
-    """, (user_id, f"{year}-{month:02d}-01", f"{year}-{month:02d}-{days_in_month}"))
+    """, (
+        user_id,
+        f"{year}-{month:02d}-01",
+        f"{year}-{month:02d}-{days_in_month}"
+    ))
     results = cur.fetchall()
 
-    daily_data = {
-        row[0].strftime('%Y-%m-%d'): {'calories': row[1], 'protein': row[2]}
-        for row in results
-    }
+    daily_data = {}
+    for row in results:
+        date_str = row[0].strftime('%Y-%m-%d')
+        calories, protein = row[1], row[2]
 
-    # Get the calendar weeks (list of weeks, each week is list of days)
-    month_days = list(cal.itermonthdays(year, month))  # flat list of 42 values (0 = blank)
-    weeks = [month_days[i:i+7] for i in range(0, len(month_days), 7)]
+        if abs(calories - goal_calories) <= 100 and abs(protein - goal_protein) <= 20:
+            color = 'green'
+        elif abs(calories - goal_calories) <= 100:
+            color = 'orange'
+        else:
+            color = 'red'
+
+        daily_data[date_str] = {
+            'calories': calories,
+            'protein': protein,
+            'color': color
+        }
+
+    # Build calendar weeks
+    month_days = list(cal.itermonthdays(year, month))
+    weeks = [month_days[i:i + 7] for i in range(0, len(month_days), 7)]
 
     cur.close()
     conn.close()
 
-    return render_template('calendar.html', year=year, month=month, weeks=weeks, daily_data=daily_data)
+    return render_template(
+        'calendar.html',
+        year=year,
+        month=month,
+        weeks=weeks,
+        daily_data=daily_data,
+        goal_calories=goal_calories,
+        goal_protein=goal_protein
+    )
+
 
 
 
