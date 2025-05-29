@@ -183,6 +183,25 @@ def dashboard():
         return redirect('/')
     user_id = user_row[0]
 
+    # After getting user_id
+    cur.execute("""
+        SELECT daily_calories FROM goals WHERE user_id = %s
+    """, (user_id,))
+    goal_row = cur.fetchone()
+    daily_calories = goal_row[0] if goal_row else 0
+
+    cur.execute("""
+        SELECT COALESCE(SUM(calories), 0)
+        FROM macros
+        WHERE user_id = %s AND date_added = CURRENT_DATE
+    """, (user_id,))
+    total_row = cur.fetchone()
+    total_calories = total_row[0]
+
+    remaining_calories = max(0, daily_calories - total_calories)
+    today_str = datetime.today().strftime("%B %d")  # e.g., "May 28"
+
+
     # Get goal calories
     cur.execute("SELECT daily_calories FROM goals WHERE user_id = %s", (user_id,))
     goal_row = cur.fetchone()
@@ -206,7 +225,10 @@ def dashboard():
                            username=username,
                            current_calories=current_calories,
                            daily_calories=daily_calories,
-                           percent_eaten=percent_eaten)
+                           percent_eaten=percent_eaten,
+                           remaining_calories=remaining_calories,
+                           today_str=today_str
+                           )
 
 
 
@@ -749,6 +771,7 @@ def calendar():
             'protein': protein,
             'color': color
         }
+    
 
     # Build calendar weeks
     month_days = list(cal.itermonthdays(year, month))
