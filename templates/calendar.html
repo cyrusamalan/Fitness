@@ -68,7 +68,11 @@
   </a>
 </div>
 
-<h2>{{ today_str }}</h2>
+<h2 style="text-align: center;">
+  <a href="{{ url_for('calendar', month=prev_month, year=prev_year) }}" style="color: white; text-decoration: none; margin-right: 20px;">⬅</a>
+  {{ today_str }}
+  <a href="{{ url_for('calendar', month=next_month, year=next_year) }}" style="color: white; text-decoration: none; margin-left: 20px;">➡</a>
+</h2>
 
 <div class="calendar-container">
   {% for day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] %}

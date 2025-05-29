@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, flash, session, url_for
 import psycopg2
 import bcrypt
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from flask import make_response
-from calendar import monthrange, Calendar
-from datetime import datetime
+from calendar import monthrange, Calendar, month_name
+
 
 def insert_goals(cur, user_id, weight, height_ft, height_in, age, gender, goal_type, activity_level):
     total_height_cm = height_ft * 30.48 + height_in * 2.54
@@ -709,6 +709,9 @@ def nutrition():
 
     return render_template('nutrition.html', nutrients=nutrients)
 
+from datetime import datetime, timedelta
+from calendar import monthrange, Calendar
+
 @app.route('/calendar')
 @nocache
 def calendar():
@@ -730,9 +733,15 @@ def calendar():
         return redirect('/')
     user_id = user_row[0]
 
+    # Get month/year from URL parameters if provided
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
     today = datetime.today()
-    year = today.year
-    month = today.month
+    if not month or not year:
+        month = today.month
+        year = today.year
+
     cal = Calendar()
     days_in_month = monthrange(year, month)[1]
 
@@ -753,8 +762,8 @@ def calendar():
         f"{year}-{month:02d}-{days_in_month}"
     ))
     results = cur.fetchall()
-    today_str = datetime.today().strftime("%B %d")  # e.g., "May 28"
 
+    today_str = datetime.today().strftime("%B %d")  # e.g., "May 28"
 
     daily_data = {}
     for row in results:
@@ -773,14 +782,20 @@ def calendar():
             'protein': protein,
             'color': color
         }
-    
+    today_str = f"{month_name[month]}"
 
-    # Build calendar weeks
+    # Build calendar layout
     month_days = list(cal.itermonthdays(year, month))
     weeks = [month_days[i:i + 7] for i in range(0, len(month_days), 7)]
 
     cur.close()
     conn.close()
+
+    # Determine next and previous months
+    prev_month = month - 1 if month > 1 else 12
+    next_month = month + 1 if month < 12 else 1
+    prev_year = year - 1 if month == 1 else year
+    next_year = year + 1 if month == 12 else year
 
     return render_template(
         'calendar.html',
@@ -790,8 +805,13 @@ def calendar():
         daily_data=daily_data,
         goal_calories=goal_calories,
         goal_protein=goal_protein,
-        today_str=today_str
+        today_str=today_str,
+        prev_month=prev_month,
+        prev_year=prev_year,
+        next_month=next_month,
+        next_year=next_year
     )
+
 
 
 
