@@ -753,6 +753,8 @@ def calendar():
         f"{year}-{month:02d}-{days_in_month}"
     ))
     results = cur.fetchall()
+    today_str = datetime.today().strftime("%B %d")  # e.g., "May 28"
+
 
     daily_data = {}
     for row in results:
@@ -787,7 +789,8 @@ def calendar():
         weeks=weeks,
         daily_data=daily_data,
         goal_calories=goal_calories,
-        goal_protein=goal_protein
+        goal_protein=goal_protein,
+        today_str=today_str
     )
 
 
