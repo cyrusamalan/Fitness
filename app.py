@@ -71,14 +71,21 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # used for flashing messages
 
 # Database connection function
-def get_db_connection():
+def get_db_connection_1():
     return psycopg2.connect(
         dbname="fitness",
         user="postgres",
         host="localhost",
         port="5432"
     )
-
+def get_db_connection():
+    return psycopg2.connect(
+        dbname="fitnessDB",
+        user="postgres",
+        password='Cyrus!234'
+,        host="postgres.cd4wgeg2od85.us-east-2.rds.amazonaws.com",
+        port="5432"
+    )
 def nocache(view):
     @wraps(view)
     def no_cache(*args, **kwargs):
