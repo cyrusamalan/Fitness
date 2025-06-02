@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 from flask import make_response
 from calendar import monthrange, Calendar, month_name
+import os
 
 
 def insert_goals(cur, user_id, weight, height_ft, height_in, age, gender, goal_type, activity_level):
@@ -825,4 +826,6 @@ def calendar():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
+    
