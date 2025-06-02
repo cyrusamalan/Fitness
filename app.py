@@ -561,8 +561,9 @@ def log_food():
         item = request.form['item']
         calories = request.form['calories']
         protein = request.form['protein']
-        carbs = request.form['carbs']
-        fat = request.form['fat']
+        carbs = int(request.form.get('carbs') or 0)
+        fat = int(request.form.get('fat') or 0)
+
 
         try:
             cur.execute("""
