@@ -559,18 +559,23 @@ def log_food():
 
     if request.method == 'POST':
         item = request.form['item']
-        calories = request.form['calories']
-        protein = request.form['protein']
+        calories = float(request.form['calories'])
+        protein = float(request.form['protein'])
         carbs = float(request.form.get('carbs') or 0)
         fat = float(request.form.get('fat') or 0)
+        servings = int(request.form.get('servings') or 1)
 
-
+        # Multiply each macro by the servings
+        calories *= servings
+        protein *= servings
+        carbs *= servings
+        fat *= servings
 
         try:
             cur.execute("""
-                INSERT INTO macros (user_id, item, calories, protein, carbs, fat, date_added)
-                VALUES (%s, %s, %s, %s, %s, %s, NOW())
-            """, (user_id, item, calories, protein, carbs, fat))
+                INSERT INTO macros (user_id, item, calories, protein, carbs, fat, servings, date_added)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+            """, (user_id, item, calories, protein, carbs, fat, servings))
             conn.commit()
             flash("✅ Food logged successfully!")
             return redirect('/dashboard')
@@ -580,7 +585,8 @@ def log_food():
         finally:
             cur.close()
             conn.close()
-        return redirect('/log_food')  # Ensures you return after POST
+        return redirect('/log_food')
+
 
     # ✅ GET: Fetch recent items to display as quick-add
     cur.execute("""
