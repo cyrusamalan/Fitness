@@ -72,14 +72,14 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # used for flashing messages
 
 # Database connection function
-def get_db_connection_1():
+def get_db_connection():
     return psycopg2.connect(
         dbname="fitness",
         user="postgres",
         host="localhost",
         port="5432"
     )
-def get_db_connection():
+def get_db_connection_1():
     return psycopg2.connect(
         dbname="fitnessDB",
         user="postgres",
@@ -561,8 +561,9 @@ def log_food():
         item = request.form['item']
         calories = request.form['calories']
         protein = request.form['protein']
-        carbs = int(request.form.get('carbs') or 0)
-        fat = int(request.form.get('fat') or 0)
+        carbs = float(request.form.get('carbs') or 0)
+        fat = float(request.form.get('fat') or 0)
+
 
 
         try:
