@@ -72,14 +72,14 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # used for flashing messages
 
 # Database connection function
-def get_db_connection():
+def get_db_connection_1():
     return psycopg2.connect(
         dbname="fitness",
         user="postgres",
         host="localhost",
         port="5432"
     )
-def get_db_connection_1():
+def get_db_connection():
     return psycopg2.connect(
         dbname="fitnessDB",
         user="postgres",
