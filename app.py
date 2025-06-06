@@ -854,7 +854,7 @@ def get_access_token():
     }
 
     response = requests.post(url, headers=headers, data=data)
-    print("🔐 OAuth response:", response.status_code, response.text)
+    #print("🔐 OAuth response:", response.status_code, response.text)
 
     return response.json()['access_token']
 
@@ -878,10 +878,10 @@ def search():
         }
 
         response = requests.get(search_url, headers=headers, params=params)
-        print("🔍 FatSecret response:", response.text)  # ← add this
-        print("🔍 FatSecret response:", response.json())
-        logging.basicConfig(level=logging.INFO)
-        logging.info("🔍 FatSecret response: %s", response.text)
+        #print("🔍 FatSecret response:", response.text)  # ← add this
+        #print("🔍 FatSecret response:", response.json())
+        #logging.basicConfig(level=logging.INFO)
+        #logging.info("🔍 FatSecret response: %s", response.text)
 
         return jsonify(response.json())
 
@@ -905,7 +905,7 @@ def food_details():
             }
         )
 
-        print("🍽️ Food details response:", response.text)  # Log to confirm
+        #print("🍽️ Food details response:", response.text)  # Log to confirm
         return jsonify(response.json())
     except Exception as e:
         print("🔥 Error in /food_details:", e)
