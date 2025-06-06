@@ -1,12 +1,25 @@
-from flask import Flask, render_template, request, redirect, flash, session, url_for
+from flask import Flask, jsonify, render_template, request, redirect, flash, session, url_for
 import psycopg2
 import bcrypt
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import make_response
+from flask_cors import CORS
 from calendar import monthrange, Calendar, month_name
 import os
+import requests
+import logging
+import base64
 
+app = Flask(__name__)
+app.secret_key = 'supersecretkey'  # used for flashing messages
+CORS(app)  # ✅ This enables CORS for all origins
+
+#CLIENT_ID = os.getenv('CLIENT_ID')
+#CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+
+CLIENT_ID = 'd1dc16bc0ff248d996719575cabf705c'
+CLIENT_SECRET = 'c42e2819e65a4cae9014b0e9d05477e5'
 
 def insert_goals(cur, user_id, weight, height_ft, height_in, age, gender, goal_type, activity_level):
     total_height_cm = height_ft * 30.48 + height_in * 2.54
@@ -829,7 +842,74 @@ def calendar():
     )
 
 
+def get_access_token():
+    url = 'https://oauth.fatsecret.com/connect/token'
+    headers = {
+        'Authorization': 'Basic ' + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    data = {
+        'grant_type': 'client_credentials',
+        'scope': 'basic'
+    }
 
+    response = requests.post(url, headers=headers, data=data)
+    print("🔐 OAuth response:", response.status_code, response.text)
+
+    return response.json()['access_token']
+
+@app.route('/search', methods=['POST'])
+def search():
+    try:
+        query = request.json.get('query')
+        access_token = get_access_token()
+
+        search_url = 'https://platform.fatsecret.com/rest/server.api'
+        params = {
+            'method': 'foods.search',
+            'search_expression': query.strip().lower(),
+            'format': 'json',
+            'max_results': 50,       # or another number allowed by the API
+            'page_number': 0         # start with 0, then page through
+        }
+
+        headers = {
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        response = requests.get(search_url, headers=headers, params=params)
+        print("🔍 FatSecret response:", response.text)  # ← add this
+        print("🔍 FatSecret response:", response.json())
+        logging.basicConfig(level=logging.INFO)
+        logging.info("🔍 FatSecret response: %s", response.text)
+
+        return jsonify(response.json())
+
+    except Exception as e:
+        print("🔥 Error in /search route:", e)
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/food_details', methods=['POST'])
+def food_details():
+    try:
+        food_id = request.json.get('food_id')
+        access_token = get_access_token()
+
+        response = requests.get(
+            'https://platform.fatsecret.com/rest/server.api',
+            headers={'Authorization': f'Bearer {access_token}'},
+            params={
+                'method': 'food.get',
+                'food_id': food_id,
+                'format': 'json'
+            }
+        )
+
+        print("🍽️ Food details response:", response.text)  # Log to confirm
+        return jsonify(response.json())
+    except Exception as e:
+        print("🔥 Error in /food_details:", e)
+        return jsonify({'error': str(e)}), 500
 
 
 

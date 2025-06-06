@@ -116,6 +116,13 @@
 
   </div>
 </div>
+<h1>Search for a Food</h1>
+<input type="text" id="searchInput" placeholder="Search for foods..." />
+<button onclick="searchFood()">Search</button>
+
+<div id="results"></div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
