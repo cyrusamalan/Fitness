@@ -58,6 +58,49 @@
   button {
     padding: 8px 12px;
   }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 10px;
+    }
+
+    .container {
+      padding: 10px;
+    }
+
+    .flex-wrapper {
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-section, .quickadd-section {
+      min-width: 100%;
+    }
+
+    h2, h3 {
+      text-align: center;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      font-size: 16px;
+    }
+
+    .quick-add {
+      font-size: 14px;
+      padding: 8px;
+    }
+
+    #searchInput {
+      font-size: 16px;
+      padding: 8px;
+    }
+  }
 </style>
 
 <div class="container">
