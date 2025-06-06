@@ -771,7 +771,8 @@ def calendar():
         month = today.month
         year = today.year
 
-    cal = Calendar()
+    cal = Calendar(firstweekday=6)
+
     days_in_month = monthrange(year, month)[1]
 
     # Fetch daily goals
