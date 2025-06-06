@@ -168,6 +168,30 @@
 <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 <script>
+  p.onclick = async () => {
+  const nutrition = await getNutrition(food.food_id);
+  if (!nutrition) {
+    nutritionDiv.innerHTML = '<i>Nutrition data not available.</i>';
+  } else {
+    nutritionDiv.innerHTML = `
+      <ul>
+        <li>Calories: ${nutrition.calories}</li>
+        <li>Protein: ${nutrition.protein}g</li>
+        <li>Fat: ${nutrition.fat}g</li>
+        <li>Carbs: ${nutrition.carbohydrate}g</li>
+      </ul>
+    `;
+
+    // 💡 Fill the log form fields
+    document.getElementById('item').value = food.food_name;
+    document.querySelector('input[name="calories"]').value = nutrition.calories;
+    document.querySelector('input[name="protein"]').value = nutrition.protein;
+    document.querySelector('input[name="carbs"]').value = nutrition.carbohydrate;
+    document.querySelector('input[name="fat"]').value = nutrition.fat;
+  }
+  nutritionDiv.style.display = 'block';
+};
+
 document.addEventListener("DOMContentLoaded", function () {
   const buttons = document.querySelectorAll('.quick-add');
   const searchBox = document.getElementById('searchBox');

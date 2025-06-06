@@ -1,6 +1,6 @@
 async function searchFood() {
   const query = document.getElementById('searchInput').value;
-  const response = await fetch('https://fatsecret.onrender.com/search', {
+  const response = await fetch('/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query })
@@ -29,21 +29,38 @@ async function searchFood() {
     nutritionDiv.style.marginLeft = '10px';
     nutritionDiv.style.display = 'none';
 
+    let clickedOnce = false;
+    let nutritionData = null;
+
     p.onclick = async () => {
-      const nutrition = await getNutrition(food.food_id);
-      if (!nutrition) {
-        nutritionDiv.innerHTML = '<i>Nutrition data not available.</i>';
+      if (!clickedOnce) {
+        // First click: fetch and display nutrition
+        nutritionData = await getNutrition(food.food_id);
+        if (!nutritionData) {
+          nutritionDiv.innerHTML = '<i>Nutrition data not available.</i>';
+        } else {
+          nutritionDiv.innerHTML = `
+            <ul>
+              <li>Calories: ${nutritionData.calories}</li>
+              <li>Protein: ${nutritionData.protein}g</li>
+              <li>Fat: ${nutritionData.fat}g</li>
+              <li>Carbs: ${nutritionData.carbohydrate}g</li>
+            </ul>
+            <small>Click again to select this food.</small>
+          `;
+        }
+        nutritionDiv.style.display = 'block';
+        clickedOnce = true;
       } else {
-        nutritionDiv.innerHTML = `
-          <ul>
-            <li>Calories: ${nutrition.calories}</li>
-            <li>Protein: ${nutrition.protein}g</li>
-            <li>Fat: ${nutrition.fat}g</li>
-            <li>Carbs: ${nutrition.carbohydrate}g</li>
-          </ul>
-        `;
+        // Second click: populate the form
+        if (nutritionData) {
+          document.getElementById('item').value = food.food_name;
+          document.querySelector('input[name="calories"]').value = parseFloat(nutritionData.calories);
+          document.querySelector('input[name="protein"]').value = parseFloat(nutritionData.protein);
+          document.querySelector('input[name="carbs"]').value = parseFloat(nutritionData.carbohydrate);
+          document.querySelector('input[name="fat"]').value = parseFloat(nutritionData.fat);
+        }
       }
-      nutritionDiv.style.display = 'block';
     };
 
     foodContainer.appendChild(p);
@@ -53,7 +70,7 @@ async function searchFood() {
 }
 
 async function getNutrition(food_id) {
-  const response = await fetch('https://fatsecret.onrender.com/food_details', {
+  const response = await fetch('/food_details', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ food_id })
@@ -65,7 +82,6 @@ async function getNutrition(food_id) {
 
   if (!servingData) return null;
 
-  // ✅ Handle both object and array response
   const serving = Array.isArray(servingData) ? servingData[0] : servingData;
 
   return {
@@ -75,4 +91,3 @@ async function getNutrition(food_id) {
     carbohydrate: serving.carbohydrate
   };
 }
-
