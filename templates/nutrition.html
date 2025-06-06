@@ -58,12 +58,12 @@
   <div class="nutrient-section">
     <div class="nutrient-label">
       <strong>{{ nutrient.name }}</strong>
-      <span>{{ nutrient.total }} / {{ nutrient.goal }}g</span>
+      <span>{{ nutrient.total | round(2) }} / {{ nutrient.goal | round(2) }}g</span>
     </div>
     <div class="progress-bar">
-      <div class="progress-fill {{ nutrient.class }}" style="width: {{ nutrient.percent }}%;"></div>
+      <div class="progress-fill {{ nutrient.class }}" style="width: {{ nutrient.percent | round(0) }}%;"></div>
     </div>
-    <small>{{ nutrient.remaining }}g left</small>
+    <small>{{ nutrient.remaining | round(2) }}g left</small>
   </div>
   {% endfor %}
 
