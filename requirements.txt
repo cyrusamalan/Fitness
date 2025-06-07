@@ -3,3 +3,4 @@ requests
 flask-cors
 psycopg2
 bcrypt
+gunicorn
