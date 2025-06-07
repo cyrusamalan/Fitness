@@ -98,7 +98,8 @@ def get_db_connection():
         user="postgres",
         password='Cyrus!234'
 ,        host="postgres.cd4wgeg2od85.us-east-2.rds.amazonaws.com",
-        port="5432"
+        port="5432",
+        sslmode='require'
     )
 def nocache(view):
     @wraps(view)
