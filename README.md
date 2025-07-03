@@ -12,11 +12,11 @@ A full-stack web application built using Flask. This project handles user authen
 
 ## 📁 Project Structure
 
-Scripts/ # Additional helper or utility scripts
-├── static/ # Static assets (CSS, JS, images)
-├── templates/ # HTML templates (rendered with Jinja2)
-├── acc.py # Account-related logic or routes
-├── app.py # Main application setup
-├── login.py # Handles user login logic
-├── main.py # Entry point or routing logic
-├── requirements.txt # Python dependencies
+Scripts/ # Additional helper or utility scripts 
+├── static/ # Static assets (CSS, JS, images) 
+├── templates/ # HTML templates (rendered with Jinja2) 
+├── acc.py # Account-related logic or routes 
+├── app.py # Main application setup 
+├── login.py # Handles user login logic 
+├── main.py # Entry point or routing logic 
+├── requirements.txt # Python dependencies 
